@@ -1,0 +1,10 @@
+Changes
+lib/HTML/Template/Associate/FormField.pm
+Makefile.PL
+MANIFEST
+README
+cgi-bin/exsample.cgi
+t/0_load.t
+t/1_param.t
+t/2_hidden.t
+t/3_output.t

@@ -1,0 +1,29 @@
+Revision history for Perl extension HTML::Template::Associate::FormField.
+
+
+0.08
+	- It corresponded to mod_perl.
+
+0.07
+	- The method of CGI.pm was called with the function base.
+
+0.06
+	BUG Fix :
+	- To type startform When it specifies action When not specified, it was ma-
+	  de for "Use of uninitialized value" not to occur in CGI.pm.
+
+0.05
+	- add hidden object method exists
+
+0.04
+	- It decided to accept an object without param, and HASH.
+
+0.03
+	- It decided to treat the hidden field.
+
+0.02
+	- With the CGI.pm side It solved that escapeHTML was not moving well.
+
+0.01  Mon Jun  2 14:29:46 2004
+	- original version; created by h2xs 1.21
+
