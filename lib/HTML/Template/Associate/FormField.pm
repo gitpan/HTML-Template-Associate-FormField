@@ -1,11 +1,16 @@
 package HTML::Template::Associate::FormField;
-
+#
+# Copyright 2004 Bee Flag, Corp. All Rights Reserved.
+# Masatoshi Mizuno <mizuno@beeflag.com>
+#
+# $Id: FormField.pm,v 1.11 2004/08/16 00:32:33 Lushe Exp $
+#
 use 5.004;
 use UNIVERSAL qw( isa );
 use CGI qw( :form );
 use strict;
 
-our $VERSION= '0.08';
+our $VERSION= '0.09';
 
 sub new {
 	my $class= shift;
@@ -149,15 +154,23 @@ sub reset__    { reset($_[1]) }
 sub defaults__ { defaults($_[1]) }
 sub checkbox__ { checkbox(&_proc_defaults) }
 sub checkbox_group__ { checkbox_group(&_proc_defaults) }
-sub radio_group__    { radio_group(&_proc_defaults) }
-sub radio__ { &radio_group__ }
 sub popup_menu__ { popup_menu(&_proc_defaults) }
-sub select__ { &popup_menu__ }
 sub scrolling_list__ { scrolling_list(&_proc_defaults) }
+sub select__ { &popup_menu__ }
+sub radio_group__    { radio_group(&_proc_default) }
+sub radio__ { &radio_group__ }
 sub image_button__ { image_button($_[1]) }
 sub image__ { image_button($_[1]) }
 sub submit__   { submit($_[1]) }
 
+sub _proc_default {
+	my($af, $attr)= @_;
+	(! $attr->{override} && $af->{query}->param($attr->{name})) and do {
+		$attr->{override}= 1;
+		$attr->{default}= $af->{query}->param($attr->{name});
+	 };
+	return $attr;
+}
 sub _proc_defaults {
 	my($af, $attr)= @_;
 	(! $attr->{override} && $af->{query}->param($attr->{name})) and do {

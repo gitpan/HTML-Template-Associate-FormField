@@ -1,5 +1,8 @@
 Revision history for Perl extension HTML::Template::Associate::FormField.
 
+0.09
+	BUG Fix :
+	- It passed having passed the parameter of the radio button to "defaults" to "default".
 
 0.08
 	- It corresponded to mod_perl.
