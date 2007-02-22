@@ -1,4 +1,8 @@
-Revision history for Perl extension HTML::Template::Associate::FormField.
+Revision history for Perl extension .
+
+0.10
+	- It corresponded to HTML::Template::Associate.
+	- Some codes are corrected.
 
 0.09
 	BUG Fix :

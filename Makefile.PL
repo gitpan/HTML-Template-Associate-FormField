@@ -1,11 +1,12 @@
-use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
-WriteMakefile(
-    'NAME'		=> 'HTML::Template::Associate::FormField',
-    'VERSION_FROM' => 'lib/HTML/Template/Associate/FormField.pm', # finds $VERSION
-    'PREREQ_PM' => {
-     'CGI' => '2.45',
-     'HTML::Template'=> '2.0',
-     },
-);
+use inc::Module::Install;
+name 'HTML-Template-Associate-FormField';
+author 'Masatoshi Mizuno E<lt>mizunoE<64>bomcity.comE<gt>';
+all_from 'lib/HTML/Template/Associate/FormField.pm';
+version_from 'lib/HTML/Template/Associate/FormField.pm';
+
+build_requires 'Test::More';
+build_requires 'Test::Pod';
+
+use_test_base;
+auto_include;
+WriteAll;

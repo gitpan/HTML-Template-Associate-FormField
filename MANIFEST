@@ -1,10 +1,12 @@
+Build.PL
 Changes
 lib/HTML/Template/Associate/FormField.pm
 Makefile.PL
-MANIFEST
+MANIFEST			This list of files
+META.yml
 README
-cgi-bin/exsample.cgi
-t/0_load.t
-t/1_param.t
-t/2_hidden.t
-t/3_output.t
+t/00_use.t
+t/01_param.t
+t/02_hidden.t
+t/03_output.t
+t/89_pod.t

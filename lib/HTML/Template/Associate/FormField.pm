@@ -1,35 +1,67 @@
 package HTML::Template::Associate::FormField;
 #
-# Copyright 2004 Bee Flag, Corp. All Rights Reserved.
-# Masatoshi Mizuno <mizuno@beeflag.com>
+# Copyright (C) 2004-2007 Bee Flag, Corp, All Rights Reserved.
+# Masatoshi Mizuno E<lt>mizunoE<64>bomcity.comE<gt>
 #
-# $Id: FormField.pm,v 1.11 2004/08/16 00:32:33 Lushe Exp $
+# $Id: FormField.pm 223 2007-02-22 14:55:20Z lushe $
 #
-use 5.004;
+use strict;
+use warnings;
 use UNIVERSAL qw( isa );
 use CGI qw( :form );
 use strict;
 
-our $VERSION= '0.09';
+our $VERSION= '0.10';
 
+{
+	no warnings 'redefine';
+	sub hidden {
+		$_[0]->{hidden} ||= do {
+			my $hidden;
+			$_[0]->{hidden}=
+			HTML::Template::Associate::FormField::Hidden->new($hidden);
+		 };
+	 };
+	no strict 'refs';  ## no critic
+	for my $accessor (qw{ default defaults value }) {
+		*{__PACKAGE__."::_proc_$accessor"}= sub {
+			my($af, $attr)= @_;
+			if (! $attr->{override}
+			  && ($attr->{$accessor}= $af->{query}->param($attr->{name}))) {
+				$attr->{override}= 1;
+			}
+			return $attr;
+		  };
+	}
+  };
+
+sub init {
+	my ($af, $params)= @_;
+	$af->{query}= _new_query($params->{cgi});
+	$af->params($params->{form_fields});
+	return $af;
+}
 sub new {
 	my $class= shift;
 	my $af= bless {
-	  query => _new_query(shift),
-	  param => {},
+	  query=> _new_query(shift),
+	  param=> {},
 	 }, $class;
 	$af->params(shift);
 	return $af;
 }
 sub param {
 	my($af, $key, $value)= @_;
-	@_< 2 and return keys %{$af->{param}};
- 	my $name;
- 	$key=~/^\__(.+?)\__$/
- 	  ? do { $name= $1 }:
- 	    do { $name= $key; $key= '__'. $key .'__' };
+	return keys %{$af->{param}} if @_< 2;
+	my $name;
+	if ($key=~/^\__(.+?)\__$/) {
+		$name= $1;
+	} else {
+		$name= $key;
+		$key= '__'. $key .'__';
+	}
 	$key= uc($key);
-	(@_== 3 && ref($value) eq 'HASH') ? do {
+	if (@_== 3 && ref($value) eq 'HASH') {
 		while (my($n, $v)= each %$value) {
 			$n=~/^\-/ and do {
 				$n=~s/^\-//;
@@ -41,51 +73,34 @@ sub param {
 				delete $value->{$n};
 			 };
 		}
-		! $value->{type} ? do {
-			return "";
-		 }: do {
-			$value->{type}=~/[Ff][Oo][Rr][Mm]$/ ? do {
-				$value->{alias} and $value->{name}= $value->{alias};
-			 }: do {
-				$value->{name}= $value->{alias} || $name;
-			 };
-			$af->{param}{$key}= $value;
-			return wantarray ? %{$af->{param}{$key}}: $af->{param}{$key};
-		 };
-	 }: do {
+		return "" unless $value->{type};
+		if ($value->{type}=~/[Ff][Oo][Rr][Mm]$/) {
+			$value->{name}= $value->{alias} if $value->{alias};
+		} else {
+			$value->{name}= $value->{alias} || $name;
+		}
+		$af->{param}{$key}= $value;
+		return wantarray ? %{$af->{param}{$key}}: $af->{param}{$key};
+	} else {
 		return $af->_field_conv(%{$af->{param}{$key}});
-	 };
+	}
 }
 sub params {
 	my($af, $hash)= @_;
-	($hash && ref($hash) eq 'HASH') and do {
+	if ($hash && ref($hash) eq 'HASH') {
 		while (my($key, $value)= each %$hash) { $af->param($key, $value) }
-	 };
+	}
 	return $af->{param};
 }
-
-{
-	local $^W= 0; no strict 'refs';
-	*{__PACKAGE__."::hidden"}= sub {
-		my $af= shift;
-		! $af->{hidden} and do {
-			my $hidden;
-			$af->{hidden}=
-			  HTML::Template::Associate::FormField::Hidden->new($hidden);
-		 };
-		return $af->{hidden};
-	 };
-}
-
 sub hidden_out {
 	my($af, $hidden)= @_;
-	return HTML::Template::Associate::FormField::Hidden->new($hidden);
+	HTML::Template::Associate::FormField::Hidden->new($hidden);
 }
 sub _field_conv {
 	my($af, %attr)= @_; ! %attr and return "";
 	my $_type= lc($attr{type}) || return qq{ Can't find field type. };
 	my $type= $_type. '__';
-	! $af->can($type) and return qq{ Can't call "$_type" a field type. };
+	return qq{ Can't call "$_type" a field type. } unless $af->can($type);
 	for my $key (qw(type alias)) { delete $attr{$key} }
 	return $af->$type(\%attr);
 }
@@ -102,15 +117,14 @@ sub _new_query {
 }
 sub _const_param {
 	my $query= shift || {};
-	return HTML::Template::Associate::FormField::Param->new($query);
+	HTML::Template::Associate::FormField::Param->new($query);
 }
-
 sub startform__  {
 	my($af, $attr)= @_;
-	($attr->{enctype} && $attr->{enctype}=~/[Uu][Pp][Ll][Oo][Aa][Dd]/)
-	  and $attr->{enctype}= CGI->MULTIPART;
+	$attr->{enctype}= CGI->MULTIPART
+	  if ($attr->{enctype} && $attr->{enctype}=~/[Uu][Pp][Ll][Oo][Aa][Dd]/);
 	my $form= startform($attr);
-	$af->hidden->exists and $form.= $af->hidden->get;
+	$form.= $af->hidden->get if $af->hidden->exists;
 	return $form;
 }
 sub form__ { &startform__ }
@@ -118,7 +132,7 @@ sub start_form__ { &startform__ }
 sub start_multipart_form__ {
 	my($af, $attr)= @_;
 	my $form= start_multipart_form($attr);
-	$af->hidden->exists and $form.= $af->hidden->get;
+	$form.= $af->hidden->get if $af->hidden->exists;
 	return $form;
 }
 sub multipart_form__ { &start_multipart_form__ }
@@ -163,31 +177,6 @@ sub image_button__ { image_button($_[1]) }
 sub image__ { image_button($_[1]) }
 sub submit__   { submit($_[1]) }
 
-sub _proc_default {
-	my($af, $attr)= @_;
-	(! $attr->{override} && $af->{query}->param($attr->{name})) and do {
-		$attr->{override}= 1;
-		$attr->{default}= $af->{query}->param($attr->{name});
-	 };
-	return $attr;
-}
-sub _proc_defaults {
-	my($af, $attr)= @_;
-	(! $attr->{override} && $af->{query}->param($attr->{name})) and do {
-		$attr->{override}= 1;
-		$attr->{defaults}= $af->{query}->param($attr->{name});
-	 };
-	return $attr;
-}
-sub _proc_value {
-	my($af, $attr)= @_;
-	(! $attr->{override} && $af->{query}->param($attr->{name})) and do {
-		$attr->{override}= 1;
-		$attr->{value}= $af->{query}->param($attr->{name});
-	 };
-	return $attr;
-}
-
 
 package HTML::Template::Associate::FormField::Param;
 use strict;
@@ -198,48 +187,55 @@ sub new {
 }
 sub param {
 	my($q, $key, $value)= @_;
-	@_<  2 and return keys %$q;
-	@_== 3 and $q->{$key}= $value;
-	return $q->{$key};
+	return keys %$q if @_<  2;
+	$q->{$key}= $value if @_== 3;
+	$q->{$key};
 }
-
 
 package HTML::Template::Associate::FormField::Hidden;
 use strict;
 
 sub new {
 	my($class, $hidden)= @_;
-	(! $hidden || ref($hidden) ne 'HASH') and $hidden= {};
-	return bless $hidden, $class;
+	$hidden= {} if (! $hidden || ref($hidden) ne 'HASH');
+	bless $hidden, $class;
 }
 sub set {
 	my($h, $key, $value)= @_;
-	@_== 3 and do {
-		$h->{$key} ? do {
-			ref($h->{$key}) eq 'ARRAY'
-			  ? do { push @{$h->{$key}}, $value }:
-			    do { $h->{$key}= [$h->{$key}, $value] };
-		 }:     do { $h->{$key}= $value };
-	 };
+	if (@_== 3) {
+		if ($h->{$key}) {
+			if (ref($h->{$key}) eq 'ARRAY') {
+				push @{$h->{$key}}, $value;
+			} else {
+				$h->{$key}= [$h->{$key}, $value];
+			}
+		} else {
+			$h->{$key}= $value;
+		}
+	}
 	return();
 }
 sub unset {
 	my($h, $key)= @_;
-	@_== 2 and do { delete $h->{$key} };
+	delete $h->{$key} if @_== 2;
 	return();
 }
 sub get {
 	my($h, $key)= @_;
-	@_< 2 and return _create_fields($h);
+	return _create_fields($h) if @_< 2;
 	return _create_field($key, $h->{$key});
 }
 sub exists {
 	my($h, $key)= @_;
-	@_== 2 ? do {
-		ref($h->{$key}) eq 'ARRAY'
-		  ? do { return @{$h->{$key}} ? 1: 0 }:
-		    do { return CORE::exists $h->{$key} ? 1: 0 };
-	 }:     do { return %$h ? 1: 0 };
+	if (@_== 2) {
+		if (ref($h->{$key}) eq 'ARRAY') {
+			return @{$h->{$key}} ? 1: 0;
+		} else {
+			return CORE::exists $h->{$key} ? 1: 0;
+		}
+	} else {
+		return %$h ? 1: 0;
+	}
 }
 sub clear { my $h= shift; %$h= () }
 
@@ -247,7 +243,7 @@ sub _create_fields {
 	my $hidden= shift || return "";
 	my @hidden;
 	while (my($key, $value)= each %$hidden) {
-		$value and push @hidden, _create_field($key, $value);
+		push @hidden, _create_field($key, $value) if $value;
 	}
 	return @hidden ? join('', @hidden): "";
 }
@@ -272,6 +268,7 @@ __END__
 HTML::Template::Associate::FormField
 
   - CGI Form for using by HTML::Template is generated.
+  - HTML::Template::Associate FormField plugin.
 
 =head1 SYNOPSIS
 
@@ -293,7 +290,7 @@ HTML::Template::Associate::FormField
   );
 
  ## The template.
- my $exsample_template= <<END_OF_TEMPLATE;
+ my $example_template= <<END_OF_TEMPLATE;
  <html>
  <head><title>Exsample template</title></head>
  <body>
@@ -314,21 +311,21 @@ HTML::Template::Associate::FormField
 
  ## The code.
  my $cgi = CGI->new;
- # Give CGI object and definition of field ｡ｦ｡ｦ｡ｦ
+ # Give CGI object and definition of field ・・・
  my $form= HTML::Template::Associate::FormField->new($cgi, \%formfields);
  # Give ... ::Form Field object to associate 
  my $tp  = HTML::Template->new(
-            scalarref=> \$exsample_template,
+            scalarref=> \$example_template,
             associate=> [$form],
            );
  # And output your screen
  print $cgi->header, $tp->output;
 
-   or, a way to use not give associate｡ｦ｡ｦ｡ｦ
+   or, a way to use not give associate・・・
 
  my $cgi = CGI->new;
  my $form= HTML::Template::Associate::FormField->new($cgi, \%formfields);
- my $tp  = HTML::Template->new(scalarref=> \$exsample_template);
+ my $tp  = HTML::Template->new(scalarref=> \$example_template);
  # set up the parameter directly
  $tp->param('__StartForm__', $form->param('StartForm'));
  $tp->param('__NAME__',   $form->param('Name'));
@@ -340,6 +337,25 @@ HTML::Template::Associate::FormField
 
  print $cgi->header, $tp->output;
 
+
+ # If you move it as a plug-in of HTML::Template::Associate.
+ # * The code is an offer from "Alex Pavlovic" who is the author of HTML::Template::Associate.
+
+ use HTML::Template;
+ use HTML::Template::Associate;
+
+ my $associate = HTML::Template::Associate->new ({
+    target => 'FormField',
+    cgi    => $cgi,
+    form_fields => \%formfields
+  });
+
+ my $template= HTML::Template->new (
+   scalarref=> \$example_template,
+   associate=> [ $associate ],
+  );
+
+ print $cgi->header, $template->output;
 
 =head1 DESCRIPTION
 
@@ -591,17 +607,16 @@ Ayumi Ohno
 
 Special Thanks!
 
+=head1 AUTHOR
+
+Masatoshi Mizuno E<lt>mizunoE<64>bomcity.comE<gt>
 
 =head1 COPYRIGHT
 
-Copyright 2004 Bee Flag, Corp. <L<http://beeflag.com/>>, All Rights Reserved.
+Copyright (C) 2004-2007 by Bee Flag, Corp. E<lt>L<http://egg.bomcity.com/>E<gt>, All Rights Reserved.
 
-This program is free software; you can redistribute it and/or modify it under
- the same terms as Perl itself.
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself, either Perl version 5.8.6 or,
+at your option, any later version of Perl 5 you may have available.
 
-
-=head1 AUTHOR
-
-Masatoshi Mizuno, <mizunoE<64>beeflagE<46>com>
-
-
+=cut
