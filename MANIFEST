@@ -10,3 +10,5 @@ t/01_param.t
 t/02_hidden.t
 t/03_output.t
 t/89_pod.t
+t/98_perlcritic.t
+t/99_pod_coverage.t

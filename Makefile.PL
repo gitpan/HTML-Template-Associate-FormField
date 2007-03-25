@@ -5,7 +5,9 @@ all_from 'lib/HTML/Template/Associate/FormField.pm';
 version_from 'lib/HTML/Template/Associate/FormField.pm';
 
 build_requires 'Test::More';
+build_requires 'Test::Perl::Critic';
 build_requires 'Test::Pod';
+build_requires 'Test::Pod::Coverage';
 
 use_test_base;
 auto_include;

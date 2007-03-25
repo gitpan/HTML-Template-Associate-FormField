@@ -2,7 +2,9 @@ abstract: ~
 author: Masatoshi Mizuno E<lt>mizunoE<64>bomcity.comE<gt>
 build_requires: 
   Test::More: 0
+  Test::Perl::Critic: 0
   Test::Pod: 0
+  Test::Pod::Coverage: 0
 distribution_type: module
 generated_by: Module::Install version 0.64
 license: perl
@@ -11,4 +13,4 @@ no_index:
   directory: 
     - inc
     - t
-version: 0.10
+version: 0.11

@@ -3,7 +3,7 @@ package HTML::Template::Associate::FormField;
 # Copyright (C) 2004-2007 Bee Flag, Corp, All Rights Reserved.
 # Masatoshi Mizuno E<lt>mizunoE<64>bomcity.comE<gt>
 #
-# $Id: FormField.pm 223 2007-02-22 14:55:20Z lushe $
+# $Id: FormField.pm 296 2007-03-25 13:55:47Z lushe $
 #
 use strict;
 use warnings;
@@ -11,7 +11,7 @@ use UNIVERSAL qw( isa );
 use CGI qw( :form );
 use strict;
 
-our $VERSION= '0.10';
+our $VERSION= '0.11';
 
 {
 	no warnings 'redefine';
@@ -99,7 +99,7 @@ sub hidden_out {
 sub _field_conv {
 	my($af, %attr)= @_; ! %attr and return "";
 	my $_type= lc($attr{type}) || return qq{ Can't find field type. };
-	my $type= $_type. '__';
+	my $type= '__'. $_type;
 	return qq{ Can't call "$_type" a field type. } unless $af->can($type);
 	for my $key (qw(type alias)) { delete $attr{$key} }
 	return $af->$type(\%attr);
@@ -119,7 +119,7 @@ sub _const_param {
 	my $query= shift || {};
 	HTML::Template::Associate::FormField::Param->new($query);
 }
-sub startform__  {
+sub __startform  {
 	my($af, $attr)= @_;
 	$attr->{enctype}= CGI->MULTIPART
 	  if ($attr->{enctype} && $attr->{enctype}=~/[Uu][Pp][Ll][Oo][Aa][Dd]/);
@@ -127,55 +127,55 @@ sub startform__  {
 	$form.= $af->hidden->get if $af->hidden->exists;
 	return $form;
 }
-sub form__ { &startform__ }
-sub start_form__ { &startform__ }
-sub start_multipart_form__ {
+sub __form { &__startform }
+sub __start_form { &__startform }
+sub __start_multipart_form {
 	my($af, $attr)= @_;
 	my $form= start_multipart_form($attr);
 	$form.= $af->hidden->get if $af->hidden->exists;
 	return $form;
 }
-sub multipart_form__ { &start_multipart_form__ }
-sub start_upload_form__ { &start_multipart_form__ }
-sub upload_form__ { &start_multipart_form__ }
-sub opt_multipart_form__ {
+sub __multipart_form { &__start_multipart_form }
+sub __start_upload_form { &__start_multipart_form }
+sub __upload_form { &__start_multipart_form }
+sub __opt_multipart_form {
 	my($af, $attr)= @_;
 	my $form= start_multipart_form($attr);
 	$form=~s/(?:<[Ff][Oo][Rr][Mm]\s+|\s*>\n?)//g;
 	return $form;
 }
-sub opt_upload_form__ { &opt_multipart_form__ }
-sub opt_form__ {
+sub __opt_upload_form { &__opt_multipart_form }
+sub __opt_form {
 	my($af, $attr)= @_;
 	my $form= startform($attr);
 	$form=~s/(?:<[Ff][Oo][Rr][Mm]\s+|\s*>\n?)//g;
 	return $form;
 }
-sub endform__    { q{</form>} }
-sub end_form__   { &endform__  }
-sub hidden_out__ { shift->hidden->get }
-sub hidden_field__ { CGI::hidden(&_proc_value) }
-sub hidden__ { CGI::hidden(&_proc_value) }
-sub textfield__ { textfield(&_proc_value) }
-sub text__ { &textfield__ }
-sub filefield__ { filefield(&_proc_value) }
-sub file__ { &filefield__ }
-sub password_field__ { password_field(&_proc_value) }
-sub password__ { &password_field__ }
-sub textarea__ { textarea(&_proc_value) }
-sub button__   { button($_[1]) }
-sub reset__    { reset($_[1]) }
-sub defaults__ { defaults($_[1]) }
-sub checkbox__ { checkbox(&_proc_defaults) }
-sub checkbox_group__ { checkbox_group(&_proc_defaults) }
-sub popup_menu__ { popup_menu(&_proc_defaults) }
-sub scrolling_list__ { scrolling_list(&_proc_defaults) }
-sub select__ { &popup_menu__ }
-sub radio_group__    { radio_group(&_proc_default) }
-sub radio__ { &radio_group__ }
-sub image_button__ { image_button($_[1]) }
-sub image__ { image_button($_[1]) }
-sub submit__   { submit($_[1]) }
+sub __endform    { q{</form>} }
+sub __end_form   { &__endform  }
+sub __hidden_out { shift->hidden->get }
+sub __hidden_field { CGI::hidden(&_proc_value) }
+sub __hidden { CGI::hidden(&_proc_value) }
+sub __textfield { textfield(&_proc_value) }
+sub __text { &__textfield }
+sub __filefield { filefield(&_proc_value) }
+sub __file { &__filefield }
+sub __password_field { password_field(&_proc_value) }
+sub __password { &__password_field }
+sub __textarea { textarea(&_proc_value) }
+sub __button   { button($_[1]) }
+sub __reset    { reset($_[1]) }
+sub __defaults { defaults($_[1]) }
+sub __checkbox { checkbox(&_proc_defaults) }
+sub __checkbox_group { checkbox_group(&_proc_defaults) }
+sub __popup_menu { popup_menu(&_proc_defaults) }
+sub __scrolling_list { scrolling_list(&_proc_defaults) }
+sub __select { &__popup_menu }
+sub __radio_group { radio_group(&_proc_default) }
+sub __radio { &__radio_group }
+sub __image_button { image_button($_[1]) }
+sub __image { image_button($_[1]) }
+sub __submit   { submit($_[1]) }
 
 
 package HTML::Template::Associate::FormField::Param;
@@ -462,7 +462,11 @@ $form= HTML::Template::Associate::FormField-E<gt>B<new>($cgi, \%formfields);
 
 =back
 
-=head2 param
+=head2 init
+
+Constructor for HTML::Template::Associate.
+
+=head2 param, params
 
 Set up or refer to definition parameter of CGI Form.
 
