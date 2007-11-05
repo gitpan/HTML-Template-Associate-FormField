@@ -1,9 +1,8 @@
 package HTML::Template::Associate::FormField;
 #
-# Copyright (C) 2004-2007 Bee Flag, Corp, All Rights Reserved.
-# Masatoshi Mizuno E<lt>mizunoE<64>bomcity.comE<gt>
+# Masatoshi Mizuno E<lt>lusheE<64>cpan.orgE<gt>
 #
-# $Id: FormField.pm 296 2007-03-25 13:55:47Z lushe $
+# $Id: FormField.pm 298 2007-11-05 11:41:25Z lushe $
 #
 use strict;
 use warnings;
@@ -11,7 +10,7 @@ use UNIVERSAL qw( isa );
 use CGI qw( :form );
 use strict;
 
-our $VERSION= '0.11';
+our $VERSION= '0.12';
 
 {
 	no warnings 'redefine';
@@ -595,13 +594,9 @@ When you call a function start_form without an action attribute by old CGI
  module, you might find a caution "Use of uninitialized value". In this case,
  let's upgrade to the latest CGI module.
 
-When you find a bug, please email me (L<mizuno@beeflag.com>) with a light heart.
-
-
 =head1 SEE ALSO
 
  HTML::Template, CGI
-
 
 =head1 CREDITS
 
@@ -613,7 +608,7 @@ Special Thanks!
 
 =head1 AUTHOR
 
-Masatoshi Mizuno E<lt>mizunoE<64>bomcity.comE<gt>
+Masatoshi Mizuno E<lt>lusheE<64>cpan.orgE<gt>
 
 =head1 COPYRIGHT
 

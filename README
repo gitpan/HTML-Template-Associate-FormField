@@ -14,6 +14,10 @@ decide whether fixes for the module are worth downloading.
 
 INSTALLATION
 
+   * Module::Install is used.
+
+   perl -MCPAN -e 'install Module::Install'
+
 To install this module type the following:
 
    perl Makefile.PL
@@ -28,21 +32,15 @@ To install this module type the following:
    ./Build test
    ./Build install
 
-DEPENDENCIES
-
-This module requires these other modules and libraries:
-
-  blah blah blah
-
 AUTHOR
 
-Masatoshi Mizuno E<lt>mizunoE<64>bomcity.comE<gt>
+Masatoshi Mizuno E<lt>lusheE<64>cpan.orgE<gt>
 
 COPYRIGHT AND LICENCE
 
 Put the correct copyright and licence information here.
 
-Copyright (C) 2007 by Bee Flag, Corp. E<lt>L<http://egg.bomcity.com/>E<gt>, All Rights Reserved.
+Copyright (C) 2007 by Bee Flag, Corp. E<lt>http://egg.bomcity.com/E<gt>, All Rights Reserved.
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.6 or,

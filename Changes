@@ -1,39 +1,5 @@
 Revision history for Perl extension .
 
-0.11  2007/03/25
-	- Maintenance release for Pod coverage.
-
-0.10
-	- It corresponded to HTML::Template::Associate.
-	- Some codes are corrected.
-
-0.09
-	BUG Fix :
-	- It passed having passed the parameter of the radio button to "defaults" to "default".
-
-0.08
-	- It corresponded to mod_perl.
-
-0.07
-	- The method of CGI.pm was called with the function base.
-
-0.06
-	BUG Fix :
-	- To type startform When it specifies action When not specified, it was ma-
-	  de for "Use of uninitialized value" not to occur in CGI.pm.
-
-0.05
-	- add hidden object method exists
-
-0.04
-	- It decided to accept an object without param, and HASH.
-
-0.03
-	- It decided to treat the hidden field.
-
-0.02
-	- With the CGI.pm side It solved that escapeHTML was not moving well.
-
-0.01  Mon Jun  2 14:29:46 2004
-	- original version; created by h2xs 1.21
-
+0.01  Mon Nov  5 11:50:04 2007
+	- original version; created by Egg::Helper::Plugin::Maker v2.01
+	   with module name HTML::Template::Associate::FormField
